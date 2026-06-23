@@ -22,8 +22,16 @@ def save_conversation(conversation, filename):
     print("Saved to", path)
 
 
+def load_conversation(filename):
+    path = "conversations/" + filename + ".json"
+    with open(path, "r") as f:
+        conversation = json.load(f)
+    print("Loaded from", path)
+    return conversation
+
+
 def chat():
-    print("Welcome to Chatbot! Type quit to exit, or /save to save.")
+    print("Welcome to Chatbot! Type quit to exit, /save to save, /load to load.")
     conversation = []
 
     while True:
@@ -37,6 +45,12 @@ def chat():
             name = input("Save as (name): ")
             save_conversation(conversation, name)
             continue
+
+        if user_message == "/load":
+            name = input("Load which (name): ")
+            conversation = load_conversation(name)
+            continue
+
         if user_message == "":
             continue
 
