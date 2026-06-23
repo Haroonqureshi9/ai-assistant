@@ -48,7 +48,10 @@ def chat():
 
         if user_message == "/load":
             name = input("Load which (name): ")
-            conversation = load_conversation(name)
+            try:
+                conversation = load_conversation(name)
+            except:
+                print("Couldn't find a saved conversation with that name.")
             continue
 
         if user_message == "":
@@ -56,10 +59,13 @@ def chat():
 
         conversation.append({"role": "user", "parts": [{"text": user_message}]})
 
-        reply = get_ai_response(conversation)
-        print("Gemini:", reply)
-
-        conversation.append({"role": "model", "parts": [{"text": reply}]})
+        try:
+            reply = get_ai_response(conversation)
+            print("Gemini:", reply)
+            conversation.append({"role": "model", "parts": [{"text": reply}]})
+        except:
+            print("Sorry, the AI is unavailable right now. Please try again in a moment.")
+            conversation.pop()
 
 
 chat()
