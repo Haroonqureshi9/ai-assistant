@@ -1,15 +1,26 @@
 from google import genai
+from google.genai import types
 from config import API_KEY
 import json
 import os
 
 client = genai.Client(api_key=API_KEY)
 
+personalities = {
+    "tutor": "You are a patient coding tutor who explains things simply and step by step.",
+    "brainstorm": "You are an energetic brainstorm partner who offers lots of creative ideas.",
+    "concise": "You are a concise assistant who answers in one or two short sentences.",
+    "default": "You are a helpful assistant.",
+}
 
-def get_ai_response(conversation):
+
+def get_ai_response(conversation, personality):
     response = client.models.generate_content(
         model="gemini-2.5-flash",
-        contents=conversation
+        contents=conversation,
+        config=types.GenerateContentConfig(
+            system_instruction=personalities[personality]
+        )
     )
     return response.text
 
@@ -31,8 +42,9 @@ def load_conversation(filename):
 
 
 def chat():
-    print("Welcome to Chatbot! Type quit to exit, /save to save, /load to load.")
+    print("Welcome! Commands: quit, /save, /load, /personality")
     conversation = []
+    personality = "default"
 
     while True:
         user_message = input("\nYou: ").strip()
@@ -54,13 +66,23 @@ def chat():
                 print("Couldn't find a saved conversation with that name.")
             continue
 
+        if user_message == "/personality":
+            print("Available:", ", ".join(personalities.keys()))
+            choice = input("Choose a personality: ").strip()
+            if choice in personalities:
+                personality = choice
+                print("Personality set to:", personality)
+            else:
+                print("That's not a personality I know.")
+            continue
+
         if user_message == "":
             continue
 
         conversation.append({"role": "user", "parts": [{"text": user_message}]})
 
         try:
-            reply = get_ai_response(conversation)
+            reply = get_ai_response(conversation, personality)
             print("Gemini:", reply)
             conversation.append({"role": "model", "parts": [{"text": reply}]})
         except:
